@@ -1,4 +1,6 @@
 const express = require('express');
+const calculatorService = require('./services/calculatorService');
+
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -6,54 +8,29 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static('public'));
 
-// Calculate price service
+// API endpoint
 app.post('/calculate-price', (req, res) => {
-    const { rawMaterialCost, profitMarginPercent, expectedSales, taxRate } = req.body;
-
-    // Input validation
-    if (!rawMaterialCost || !profitMarginPercent || !taxRate) {
-        return res.status(400).json({
-            error: 'Raw material cost, profit margin, and tax rate are required'
-        });
-    }
-
     try {
-        // Calculate final price
-        const profitMargin = rawMaterialCost * (profitMarginPercent / 100);
-        const subtotal = rawMaterialCost + profitMargin;
-        const taxes = subtotal * (taxRate / 100);
-        const finalPrice = subtotal + taxes;
+        const { rawMaterialCost, profitMarginPercent, taxRate, expectedSales } = req.body;
 
-        // Calculate profit projections if expectedSales is provided
-        let profitProjections = null;
-        if (expectedSales) {
-            const profitPerUnit = finalPrice - rawMaterialCost;
-            const totalProfit = profitPerUnit * expectedSales;
-            profitProjections = {
-                expectedSales,
-                profitPerUnit,
-                totalProfit
-            };
+        // Validate required fields
+        if (!rawMaterialCost || !profitMarginPercent || !taxRate) {
+            return res.status(400).json({
+                error: 'Raw material cost, profit margin, and tax rate are required'
+            });
         }
 
-        // Send response
-        res.json({
-            priceBreakdown: {
-                rawMaterialCost,
-                profitMargin,
-                subtotal,
-                taxes,
-                finalPrice,
-                taxRate
-            },
-            profitProjections
-        });
+        // Use service to calculate
+        const result = calculatorService.calculatePrice(
+            parseFloat(rawMaterialCost),
+            parseFloat(profitMarginPercent),
+            parseFloat(taxRate),
+            parseInt(expectedSales)
+        );
 
+        res.json(result);
     } catch (error) {
-        res.status(500).json({
-            error: 'Error calculating price',
-            details: error.message
-        });
+        res.status(400).json({ error: error.message });
     }
 });
 

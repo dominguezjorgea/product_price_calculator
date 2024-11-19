@@ -1,21 +1,16 @@
 async function calculatePrice() {
-    const rawMaterialCost = parseFloat(document.getElementById('rawMaterialCost').value);
-    const profitMarginPercent = parseFloat(document.getElementById('profitMargin').value);
-    const taxRate = parseFloat(document.getElementById('taxRate').value);
-    const expectedSales = parseInt(document.getElementById('expectedSales').value);
-
     try {
+        // Get and validate inputs
+        const inputs = getInputs();
+        if (!validateInputs(inputs)) return;
+
+        // Make API call
         const response = await fetch('/calculate-price', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                rawMaterialCost,
-                profitMarginPercent,
-                expectedSales,
-                taxRate
-            })
+            body: JSON.stringify(inputs)
         });
 
         const data = await response.json();
@@ -28,6 +23,25 @@ async function calculatePrice() {
     } catch (error) {
         alert('Error: ' + error.message);
     }
+}
+
+function getInputs() {
+    return {
+        rawMaterialCost: parseFloat(document.getElementById('rawMaterialCost').value),
+        profitMarginPercent: parseFloat(document.getElementById('profitMargin').value),
+        taxRate: parseFloat(document.getElementById('taxRate').value),
+        expectedSales: parseInt(document.getElementById('expectedSales').value)
+    };
+}
+
+function validateInputs(inputs) {
+    for (const [key, value] of Object.entries(inputs)) {
+        if (isNaN(value) || value < 0) {
+            alert(`Please enter a valid ${key.replace(/([A-Z])/g, ' $1').toLowerCase()}`);
+            return false;
+        }
+    }
+    return true;
 }
 
 function displayResult(data) {
