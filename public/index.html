@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Price Calculator</title>
+    <link rel="stylesheet" href="/styles/main.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Product Price Calculator</h1>
+        
+        <div class="form-group">
+            <label for="rawMaterialCost">Raw Material Cost ($):</label>
+            <input type="number" id="rawMaterialCost" step="0.01" required>
+        </div>
+
+        <div class="form-group">
+            <label for="profitMargin">Profit Margin (%):</label>
+            <input type="number" id="profitMargin" required>
+        </div>
+
+        <div class="form-group">
+            <label for="taxRate">Tax Rate (%):</label>
+            <input type="number" id="taxRate" required value="21">
+        </div>
+
+        <div class="form-group">
+            <label for="expectedSales">Expected Sales (units):</label>
+            <input type="number" id="expectedSales" required>
+        </div>
+
+        <button onclick="calculatePrice()">Calculate</button>
+
+        <div id="result"></div>
+    </div>
+
+    <script src="/js/calculator.js"></script>
+</body>
+</html>
