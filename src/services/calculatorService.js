@@ -98,4 +98,5 @@ class CalculatorService {
     }
 }
 
+// Keep only this line:
 module.exports = new CalculatorService();

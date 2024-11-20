@@ -63,3 +63,6 @@ app.use((err, req, res, next) => {
 app.listen(port, () => {
     logger.info(`Server started on port ${port}`);
 });
+
+// Export for testing
+module.exports = app;
