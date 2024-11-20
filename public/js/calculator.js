@@ -53,40 +53,46 @@ function displayResult(data) {
             <h2>Price Breakdown</h2>
             <div class="price-item">
                 <span>Raw Material Cost:</span>
-                <span>$${data.priceBreakdown.rawMaterialCost.toFixed(2)}</span>
+                <span>$${formatNumber(data.priceBreakdown.rawMaterialCost)}</span>
             </div>
             <div class="price-item">
                 <span>Profit Margin:</span>
-                <span>$${data.priceBreakdown.profitMargin.toFixed(2)}</span>
+                <span>$${formatNumber(data.priceBreakdown.profitMargin)}</span>
             </div>
             <div class="price-item">
                 <span>Subtotal:</span>
-                <span>$${data.priceBreakdown.subtotal.toFixed(2)}</span>
+                <span>$${formatNumber(data.priceBreakdown.subtotal)}</span>
             </div>
             <div class="price-item">
                 <span>Taxes (${data.priceBreakdown.taxRate}%):</span>
-                <span>$${data.priceBreakdown.taxes.toFixed(2)}</span>
+                <span>$${formatNumber(data.priceBreakdown.taxes)}</span>
             </div>
             <div class="price-item final-price">
                 <span>Final Price:</span>
-                <span>$${data.priceBreakdown.finalPrice.toFixed(2)}</span>
+                <span>$${formatNumber(data.priceBreakdown.finalPrice)}</span>
             </div>
         </div>
 
-        <div class="result-section">
-            <h2>Profit Projections</h2>
-            <div class="price-item">
-                <span>Expected Sales:</span>
-                <span>${data.profitProjections.expectedSales} units</span>
+        ${data.profitProjections ? `
+            <div class="result-section">
+                <h2>Profit Projections</h2>
+                <div class="price-item">
+                    <span>Expected Sales:</span>
+                    <span>${data.profitProjections.expectedSales} units</span>
+                </div>
+                <div class="price-item">
+                    <span>Profit per Unit:</span>
+                    <span>$${formatNumber(data.profitProjections.profitPerUnit)}</span>
+                </div>
+                <div class="price-item final-price">
+                    <span>Total Expected Profit:</span>
+                    <span>$${formatNumber(data.profitProjections.totalProfit)}</span>
+                </div>
             </div>
-            <div class="price-item">
-                <span>Profit per Unit:</span>
-                <span>$${data.profitProjections.profitPerUnit.toFixed(2)}</span>
-            </div>
-            <div class="price-item final-price">
-                <span>Total Expected Profit:</span>
-                <span>$${data.profitProjections.totalProfit.toFixed(2)}</span>
-            </div>
-        </div>
+        ` : ''}
     `;
+}
+
+function formatNumber(value) {
+    return value ? value.toFixed(2) : '0.00';
 }

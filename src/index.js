@@ -1,5 +1,6 @@
 const express = require('express');
 const calculatorService = require('./services/calculatorService');
+const { ValidationError, CalculationError, InputError } = require('./utils/errorHandler');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -8,29 +9,40 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static('public'));
 
-// API endpoint
-app.post('/calculate-price', (req, res) => {
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    
+    if (err instanceof ValidationError || err instanceof InputError) {
+        return res.status(400).json({ error: err.message });
+    }
+    
+    if (err instanceof CalculationError) {
+        return res.status(500).json({ error: err.message });
+    }
+    
+    res.status(500).json({ error: 'Something went wrong!' });
+});
+
+// API endpoint with async error handling
+app.post('/calculate-price', async (req, res, next) => {
     try {
         const { rawMaterialCost, profitMarginPercent, taxRate, expectedSales } = req.body;
 
-        // Validate required fields
         if (!rawMaterialCost || !profitMarginPercent || !taxRate) {
-            return res.status(400).json({
-                error: 'Raw material cost, profit margin, and tax rate are required'
-            });
+            throw new InputError('Raw material cost, profit margin, and tax rate are required');
         }
 
-        // Use service to calculate
-        const result = calculatorService.calculatePrice(
-            parseFloat(rawMaterialCost),
-            parseFloat(profitMarginPercent),
-            parseFloat(taxRate),
-            parseInt(expectedSales)
+        const result = await calculatorService.calculatePrice(
+            rawMaterialCost,
+            profitMarginPercent,
+            taxRate,
+            expectedSales
         );
 
         res.json(result);
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        next(error);
     }
 });
 

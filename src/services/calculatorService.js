@@ -1,63 +1,47 @@
+const { ValidationError, CalculationError } = require('../utils/errorHandler');
+
 class CalculatorService {
     calculatePrice(rawMaterialCost, profitMarginPercent, taxRate, expectedSales) {
-        // Input validation
-        this.validateInputs(rawMaterialCost, profitMarginPercent, taxRate);
+        try {
+            // Input validation
+            this.validateInputs(rawMaterialCost, profitMarginPercent, taxRate);
 
-        // Calculate components
-        const profitMargin = this.calculateProfitMargin(rawMaterialCost, profitMarginPercent);
-        const subtotal = this.calculateSubtotal(rawMaterialCost, profitMargin);
-        const taxes = this.calculateTaxes(subtotal, taxRate);
-        const finalPrice = this.calculateFinalPrice(subtotal, taxes);
+            // Calculate price breakdown
+            const priceBreakdown = {
+                rawMaterialCost: Number(rawMaterialCost),
+                profitMargin: Number(rawMaterialCost * (profitMarginPercent / 100)),
+                subtotal: 0,
+                taxes: 0,
+                finalPrice: 0,
+                taxRate: Number(taxRate)
+            };
 
-        // Create price breakdown
-        const priceBreakdown = {
-            rawMaterialCost,
-            profitMargin,
-            subtotal,
-            taxes,
-            finalPrice,
-            taxRate
-        };
+            // Calculate subtotal
+            priceBreakdown.subtotal = priceBreakdown.rawMaterialCost + priceBreakdown.profitMargin;
+            
+            // Calculate taxes
+            priceBreakdown.taxes = priceBreakdown.subtotal * (taxRate / 100);
+            
+            // Calculate final price
+            priceBreakdown.finalPrice = priceBreakdown.subtotal + priceBreakdown.taxes;
 
-        // Calculate profit projections if expectedSales provided
-        const profitProjections = expectedSales ? 
-            this.calculateProfitProjections(finalPrice, rawMaterialCost, expectedSales) : 
-            null;
+            // Calculate profit projections if expectedSales is provided
+            const profitProjections = expectedSales ? {
+                expectedSales: Number(expectedSales),
+                profitPerUnit: Number(priceBreakdown.finalPrice - priceBreakdown.rawMaterialCost),
+                totalProfit: Number((priceBreakdown.finalPrice - priceBreakdown.rawMaterialCost) * expectedSales)
+            } : null;
 
-        return { priceBreakdown, profitProjections };
+            return { priceBreakdown, profitProjections };
+        } catch (error) {
+            throw new Error(`Calculation failed: ${error.message}`);
+        }
     }
 
     validateInputs(rawMaterialCost, profitMarginPercent, taxRate) {
         if (rawMaterialCost <= 0) throw new Error('Raw material cost must be greater than 0');
         if (profitMarginPercent < 0) throw new Error('Profit margin cannot be negative');
         if (taxRate < 0) throw new Error('Tax rate cannot be negative');
-    }
-
-    calculateProfitMargin(rawMaterialCost, profitMarginPercent) {
-        return rawMaterialCost * (profitMarginPercent / 100);
-    }
-
-    calculateSubtotal(rawMaterialCost, profitMargin) {
-        return rawMaterialCost + profitMargin;
-    }
-
-    calculateTaxes(subtotal, taxRate) {
-        return subtotal * (taxRate / 100);
-    }
-
-    calculateFinalPrice(subtotal, taxes) {
-        return subtotal + taxes;
-    }
-
-    calculateProfitProjections(finalPrice, rawMaterialCost, expectedSales) {
-        const profitPerUnit = finalPrice - rawMaterialCost;
-        const totalProfit = profitPerUnit * expectedSales;
-
-        return {
-            expectedSales,
-            profitPerUnit,
-            totalProfit
-        };
     }
 }
 
